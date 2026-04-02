@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - JWT_SECRET=yatrasathi-dev-secret-2024
+      - DATABASE_PATH=/app/data/yatrasathi.db
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    environment:
+      - PUBLIC_API_URL=http://backend:3001/api
