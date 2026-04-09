@@ -3,9 +3,7 @@
   import { goto } from '$app/navigation';
   import { isAuthenticated, user } from '$lib/stores/auth';
   import { getBookings, getVehicles } from '$lib/api';
-  import {
-    DollarSign, Car, Calendar, TrendingUp, Loader2, Plus
-  } from 'lucide-svelte';
+  import { DollarSign, Car, Calendar, Loader2, ArrowRight, TrendingUp, Clock } from 'lucide-svelte';
 
   let vehicles = $state<any[]>([]);
   let bookings = $state<any[]>([]);
@@ -15,7 +13,6 @@
     const unsubscribe = isAuthenticated.subscribe((val) => {
       if (!val) goto('/auth');
     });
-
     loadData();
     return unsubscribe;
   });
@@ -40,7 +37,7 @@
   let totalEarnings = $derived(
     bookings
       .filter((b: any) => b.status === 'completed')
-      .reduce((sum: number, b: any) => sum + (b.totalAmount || 0), 0)
+      .reduce((sum: number, b: any) => sum + (b.total_amount || 0), 0)
   );
 
   let activeBookings = $derived(
@@ -48,19 +45,22 @@
   );
 
   function formatDate(dateStr: string) {
+    if (!dateStr) return 'N/A';
     try {
-      return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr.split('T')[0] || dateStr;
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     } catch {
       return dateStr;
     }
   }
 
-  const statusColors: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-700',
-    confirmed: 'bg-blue-100 text-blue-700',
-    active: 'bg-green-100 text-green-700',
-    completed: 'bg-slate-100 text-slate-600',
-    cancelled: 'bg-red-100 text-red-700',
+  const statusStyles: Record<string, string> = {
+    pending: 'bg-saffron/10 text-saffron border-saffron/20',
+    confirmed: 'bg-sage/10 text-sage border-sage/20',
+    active: 'bg-sage/10 text-sage border-sage/20',
+    completed: 'bg-ink/5 text-ink/40 border-ink/10',
+    cancelled: 'bg-crimson/10 text-crimson border-crimson/20',
   };
 </script>
 
@@ -68,90 +68,111 @@
   <title>Dashboard - YatraSathi</title>
 </svelte:head>
 
-<div class="pt-20 pb-16 bg-slate-50 min-h-screen">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-slate-900">Dashboard</h1>
-      <p class="text-slate-500 mt-1">Welcome back, {$user?.name || 'User'}</p>
+<div class="pt-16 pb-20 bg-paper min-h-screen">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Welcome Header -->
+    <div class="mb-8 pt-4">
+      <p class="text-[13px] font-mono uppercase tracking-wider text-ink/25 mb-1">Welcome back</p>
+      <h1 class="font-display text-4xl text-ink tracking-wide">{$user?.name || 'USER'}</h1>
+      <p class="text-[15px] text-ink/35 mt-2">Here's an overview of your activity on YatraSathi</p>
     </div>
 
     {#if loading}
-      <div class="flex items-center justify-center py-20">
-        <Loader2 class="w-8 h-8 text-emerald-600 animate-spin" />
+      <div class="flex flex-col items-center justify-center py-24">
+        <Loader2 class="w-8 h-8 text-sage animate-spin mb-4" />
+        <p class="text-[15px] text-ink/30">Loading dashboard...</p>
       </div>
     {:else}
-      <!-- Summary Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
-              <DollarSign class="w-6 h-6 text-emerald-600" />
+
+      <!-- Stat Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+        <div class="bg-white rounded-2xl p-6 border border-ink/[0.04] shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-sage/20 to-sage/5 flex items-center justify-center">
+              <DollarSign class="w-6 h-6 text-sage" />
             </div>
-            <div>
-              <p class="text-sm text-slate-500">Total Earnings</p>
-              <p class="text-2xl font-bold text-slate-900">NPR {totalEarnings.toLocaleString()}</p>
-            </div>
+            <TrendingUp class="w-5 h-5 text-sage/30" />
           </div>
+          <p class="text-[13px] font-mono uppercase tracking-wider text-ink/25">Total Earnings</p>
+          <p class="font-display text-3xl text-ink tracking-wide mt-1">NPR {totalEarnings.toLocaleString()}</p>
+          <p class="text-[13px] text-ink/25 mt-1">From {bookings.filter(b => b.status === 'completed').length} completed bookings</p>
         </div>
 
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center">
-              <Calendar class="w-6 h-6 text-sky-600" />
+        <div class="bg-white rounded-2xl p-6 border border-ink/[0.04] shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-saffron/20 to-saffron/5 flex items-center justify-center">
+              <Calendar class="w-6 h-6 text-saffron" />
             </div>
-            <div>
-              <p class="text-sm text-slate-500">Active Bookings</p>
-              <p class="text-2xl font-bold text-slate-900">{activeBookings}</p>
-            </div>
+            {#if activeBookings > 0}
+              <span class="flex items-center gap-1.5 px-2.5 py-1 bg-sage/10 rounded-full">
+                <span class="w-1.5 h-1.5 bg-sage rounded-full animate-pulse"></span>
+                <span class="text-[12px] font-semibold text-sage">Live</span>
+              </span>
+            {/if}
           </div>
+          <p class="text-[13px] font-mono uppercase tracking-wider text-ink/25">Active Bookings</p>
+          <p class="font-display text-3xl text-ink tracking-wide mt-1">{activeBookings}</p>
+          <p class="text-[13px] text-ink/25 mt-1">{bookings.length} total bookings</p>
         </div>
 
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
-              <Car class="w-6 h-6 text-amber-600" />
-            </div>
-            <div>
-              <p class="text-sm text-slate-500">Vehicles Listed</p>
-              <p class="text-2xl font-bold text-slate-900">{vehicles.length}</p>
+        <div class="bg-white rounded-2xl p-6 border border-ink/[0.04] shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-ink/10 to-ink/5 flex items-center justify-center">
+              <Car class="w-6 h-6 text-ink/40" />
             </div>
           </div>
+          <p class="text-[13px] font-mono uppercase tracking-wider text-ink/25">Vehicles Listed</p>
+          <p class="font-display text-3xl text-ink tracking-wide mt-1">{vehicles.length}</p>
+          <p class="text-[13px] text-ink/25 mt-1">
+            {vehicles.filter(v => v.available || v.isAvailable).length} currently available
+          </p>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Two Column Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
         <!-- My Vehicles -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100">
-          <div class="flex items-center justify-between p-6 border-b border-slate-100">
-            <h2 class="text-lg font-bold text-slate-900">My Vehicles</h2>
+        <div class="bg-white rounded-2xl border border-ink/[0.04] shadow-sm overflow-hidden">
+          <div class="flex items-center justify-between px-6 py-4 border-b border-ink/[0.04]">
+            <h2 class="text-[15px] font-semibold text-ink">My Vehicles</h2>
+            <span class="text-[13px] text-ink/25">{vehicles.length} listed</span>
           </div>
-          <div class="p-6">
+          <div class="p-4">
             {#if vehicles.length === 0}
-              <div class="text-center py-10">
-                <Car class="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                <p class="text-sm text-slate-500">No vehicles listed yet</p>
+              <div class="text-center py-12">
+                <div class="inline-flex items-center justify-center w-14 h-14 bg-ink/[0.03] rounded-2xl mb-4">
+                  <Car class="w-7 h-7 text-ink/15" />
+                </div>
+                <p class="text-[15px] text-ink/30 mb-1">No vehicles listed</p>
+                <p class="text-[13px] text-ink/20">Start earning by listing your vehicle</p>
               </div>
             {:else}
-              <div class="space-y-3">
+              <div class="space-y-2">
                 {#each vehicles.slice(0, 5) as vehicle}
-                  <div class="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                    <div class="w-16 h-12 bg-slate-100 rounded-lg overflow-hidden shrink-0">
+                  <a href="/vehicles/{vehicle.id}" class="flex items-center gap-4 p-3 rounded-xl hover:bg-paper transition-colors group">
+                    <div class="w-16 h-12 bg-ink/[0.03] rounded-xl overflow-hidden shrink-0">
                       <img
-                        src={vehicle.images?.[0] || 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=200&h=150&fit=crop'}
+                        src={vehicle.image_url || 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=200&h=150&fit=crop'}
                         alt="{vehicle.make} {vehicle.model}"
                         class="w-full h-full object-cover"
                         onerror={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=200&h=150&fit=crop'; }}
                       />
                     </div>
                     <div class="flex-1 min-w-0">
-                      <p class="text-sm font-semibold text-slate-900 truncate">{vehicle.make} {vehicle.model}</p>
-                      <p class="text-xs text-slate-500">NPR {vehicle.pricePerDay?.toLocaleString()}/day</p>
+                      <p class="text-[15px] font-semibold text-ink truncate group-hover:text-sage transition-colors">
+                        {vehicle.make} {vehicle.model}
+                      </p>
+                      <p class="text-[13px] text-ink/30">
+                        NPR {(vehicle.daily_rate || 0).toLocaleString()}/day
+                      </p>
                     </div>
-                    <span class="px-2.5 py-1 text-xs font-medium rounded-lg {vehicle.isAvailable ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
-                      {vehicle.isAvailable ? 'Available' : 'Unavailable'}
+                    <span class="px-2.5 py-1 text-[12px] font-semibold tracking-wider uppercase rounded-full
+                      {vehicle.available || vehicle.isAvailable ? 'bg-sage/10 text-sage' : 'bg-crimson/10 text-crimson'}">
+                      {vehicle.available || vehicle.isAvailable ? 'Live' : 'Off'}
                     </span>
-                  </div>
+                  </a>
                 {/each}
               </div>
             {/if}
@@ -159,40 +180,44 @@
         </div>
 
         <!-- Recent Bookings -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100">
-          <div class="flex items-center justify-between p-6 border-b border-slate-100">
-            <h2 class="text-lg font-bold text-slate-900">Recent Bookings</h2>
-            <a href="/bookings" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors">
-              View All
+        <div class="bg-white rounded-2xl border border-ink/[0.04] shadow-sm overflow-hidden">
+          <div class="flex items-center justify-between px-6 py-4 border-b border-ink/[0.04]">
+            <h2 class="text-[15px] font-semibold text-ink">Recent Bookings</h2>
+            <a href="/bookings" class="flex items-center gap-1 text-[13px] text-sage font-semibold hover:underline underline-offset-2 transition-colors">
+              View All <ArrowRight class="w-3.5 h-3.5" />
             </a>
           </div>
-          <div class="p-6">
+          <div class="p-4">
             {#if bookings.length === 0}
-              <div class="text-center py-10">
-                <Calendar class="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                <p class="text-sm text-slate-500">No bookings yet</p>
+              <div class="text-center py-12">
+                <div class="inline-flex items-center justify-center w-14 h-14 bg-ink/[0.03] rounded-2xl mb-4">
+                  <Clock class="w-7 h-7 text-ink/15" />
+                </div>
+                <p class="text-[15px] text-ink/30 mb-1">No bookings yet</p>
+                <p class="text-[13px] text-ink/20">Your rental history will appear here</p>
               </div>
             {:else}
-              <div class="space-y-3">
-                {#each bookings.slice(0, 5) as booking}
-                  <div class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                    <div class="min-w-0">
-                      <p class="text-sm font-semibold text-slate-900 truncate">
+              <div class="space-y-2">
+                {#each bookings.slice(0, 6) as booking}
+                  <div class="flex items-center justify-between p-3 rounded-xl hover:bg-paper transition-colors">
+                    <div class="min-w-0 flex-1">
+                      <p class="text-[15px] font-semibold text-ink truncate">
                         {#if booking.vehicle}
                           {booking.vehicle.make} {booking.vehicle.model}
                         {:else}
                           Booking
                         {/if}
                       </p>
-                      <p class="text-xs text-slate-500">
-                        {formatDate(booking.startDate)} - {formatDate(booking.endDate)}
+                      <p class="text-[13px] text-ink/30 mt-0.5">
+                        {formatDate(booking.start_time)} - {formatDate(booking.end_time)}
                       </p>
                     </div>
-                    <div class="flex items-center gap-3 shrink-0">
-                      <span class="text-sm font-semibold text-slate-900">
-                        NPR {(booking.totalAmount || 0).toLocaleString()}
+                    <div class="flex items-center gap-3 shrink-0 ml-4">
+                      <span class="text-[15px] font-semibold text-ink">
+                        NPR {(booking.total_amount || 0).toLocaleString()}
                       </span>
-                      <span class="px-2 py-0.5 text-xs font-medium rounded-lg capitalize {statusColors[booking.status] || statusColors.pending}">
+                      <span class="px-2.5 py-1 text-[12px] font-semibold tracking-wider uppercase rounded-full border
+                        {statusStyles[booking.status] || statusStyles.pending}">
                         {booking.status || 'pending'}
                       </span>
                     </div>

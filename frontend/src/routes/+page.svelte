@@ -1,9 +1,8 @@
 <script lang="ts">
   import HeroSection from '$lib/components/HeroSection.svelte';
-  import Stats from '$lib/components/Stats.svelte';
   import SearchFilters from '$lib/components/SearchFilters.svelte';
   import VehicleCard from '$lib/components/VehicleCard.svelte';
-  import { Car } from 'lucide-svelte';
+  import { Car, ArrowRight } from 'lucide-svelte';
 
   let { data } = $props();
 
@@ -13,28 +12,19 @@
 
   let filteredVehicles = $derived.by(() => {
     let result = [...(data.vehicles || [])];
-
-    if (vehicleType !== 'all') {
-      result = result.filter((v: any) => v.type === vehicleType);
-    }
-
-    if (evOnly) {
-      result = result.filter((v: any) => v.is_ev);
-    }
-
-    if (sortBy === 'price-asc') {
-      result.sort((a: any, b: any) => (a.daily_rate || 0) - (b.daily_rate || 0));
-    } else if (sortBy === 'price-desc') {
-      result.sort((a: any, b: any) => (b.daily_rate || 0) - (a.daily_rate || 0));
-    } else if (sortBy === 'newest') {
-      result.sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
-    }
-
+    if (vehicleType !== 'all') result = result.filter((v: any) => v.type === vehicleType);
+    if (evOnly) result = result.filter((v: any) => v.is_ev);
+    if (sortBy === 'price-asc') result.sort((a: any, b: any) => (a.daily_rate || 0) - (b.daily_rate || 0));
+    else if (sortBy === 'price-desc') result.sort((a: any, b: any) => (b.daily_rate || 0) - (a.daily_rate || 0));
+    else if (sortBy === 'newest') result.sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
     return result;
   });
 
-  function onFilterChange() {
-    // Reactivity handled by $derived
+  function onFilterChange() {}
+
+  function onHeroSearch(filters: { type: string; location: string }) {
+    if (filters.type) vehicleType = filters.type;
+    // location filtering can be added when backend supports it
   }
 </script>
 
@@ -42,31 +32,17 @@
   <title>YatraSathi - Nepal's EV Rental Marketplace</title>
 </svelte:head>
 
-<HeroSection />
-<Stats />
+<HeroSection onSearch={onHeroSearch} />
 
-<!-- Vehicles Section -->
-<section id="vehicles" class="py-16 bg-slate-50">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- Section Header -->
-    <div class="text-center mb-10">
-      <h2 class="text-3xl md:text-4xl font-bold text-slate-900">
-        Available <span class="text-emerald-700">Vehicles</span>
-      </h2>
-      <p class="mt-3 text-slate-500 max-w-2xl mx-auto">
-        Choose from our curated collection of electric and eco-friendly vehicles across Kathmandu Valley.
-      </p>
+<section id="vehicles" class="py-20 bg-paper">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8">
+    <div class="mb-10">
+      <h2 class="font-display text-4xl md:text-5xl text-ink tracking-wide">AVAILABLE VEHICLES</h2>
+      <p class="mt-3 text-[16px] text-ink/35">Curated EVs and eco-friendly vehicles across Kathmandu Valley</p>
     </div>
 
-    <!-- Filters -->
-    <SearchFilters
-      bind:vehicleType
-      bind:evOnly
-      bind:sortBy
-      onchange={onFilterChange}
-    />
+    <SearchFilters bind:vehicleType bind:evOnly bind:sortBy onchange={onFilterChange} />
 
-    <!-- Vehicle Grid -->
     {#if filteredVehicles.length > 0}
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {#each filteredVehicles as vehicle (vehicle.id)}
@@ -74,30 +50,22 @@
         {/each}
       </div>
     {:else if data.vehicles?.length === 0}
-      <!-- No vehicles from API -->
       <div class="text-center py-20">
-        <div class="inline-flex items-center justify-center w-20 h-20 bg-slate-100 rounded-2xl mb-6">
-          <Car class="w-10 h-10 text-slate-400" />
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-ink/5 rounded-2xl mb-5">
+          <Car class="w-8 h-8 text-ink/15" />
         </div>
-        <h3 class="text-xl font-bold text-slate-900 mb-2">No Vehicles Available</h3>
-        <p class="text-slate-500 max-w-md mx-auto">
-          We're adding new vehicles to our fleet. Check back soon for electric rides across Kathmandu Valley!
-        </p>
+        <h3 class="text-xl font-semibold text-ink mb-2">No Vehicles Available</h3>
+        <p class="text-[15px] text-ink/35">We're adding new vehicles. Check back soon!</p>
       </div>
     {:else}
-      <!-- Filtered out all -->
       <div class="text-center py-20">
-        <div class="inline-flex items-center justify-center w-20 h-20 bg-slate-100 rounded-2xl mb-6">
-          <Car class="w-10 h-10 text-slate-400" />
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-ink/5 rounded-2xl mb-5">
+          <Car class="w-8 h-8 text-ink/15" />
         </div>
-        <h3 class="text-xl font-bold text-slate-900 mb-2">No Vehicles Found</h3>
-        <p class="text-slate-500 max-w-md mx-auto">
-          Try adjusting your filters to see more results.
-        </p>
-        <button
-          onclick={() => { vehicleType = 'all'; evOnly = false; sortBy = ''; }}
-          class="mt-4 px-6 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors"
-        >
+        <h3 class="text-xl font-semibold text-ink mb-2">No Vehicles Found</h3>
+        <p class="text-[15px] text-ink/35 mb-5">Try adjusting your filters.</p>
+        <button onclick={() => { vehicleType = 'all'; evOnly = false; sortBy = ''; }}
+          class="px-6 py-2.5 bg-sage text-white text-[14px] font-semibold rounded-xl hover:bg-sage-600 transition-colors">
           Clear Filters
         </button>
       </div>
@@ -105,18 +73,15 @@
   </div>
 </section>
 
-<!-- CTA Section -->
-<section class="py-20 bg-gradient-to-r from-emerald-700 to-emerald-900 text-white">
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-    <h2 class="text-3xl md:text-4xl font-bold mb-4">Own an EV? List it on YatraSathi</h2>
-    <p class="text-emerald-100 text-lg mb-8 max-w-2xl mx-auto">
-      Earn money by sharing your electric vehicle with riders across Kathmandu. Join Nepal's growing EV community.
+<section class="py-20 bg-ink">
+  <div class="max-w-4xl mx-auto px-6 lg:px-8 text-center">
+    <h2 class="font-display text-4xl md:text-5xl text-paper tracking-wide mb-4">OWN AN EV? LIST IT HERE</h2>
+    <p class="text-paper/35 text-[16px] max-w-xl mx-auto mb-8">
+      Earn money by sharing your electric vehicle with riders across Kathmandu.
     </p>
-    <a
-      href="/auth"
-      class="inline-block px-8 py-4 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-600 transition-colors shadow-lg"
-    >
-      Get Started Today
+    <a href="/auth"
+      class="inline-flex items-center gap-2 px-8 py-3 bg-saffron text-ink font-semibold text-[15px] rounded-xl hover:bg-saffron-300 transition-colors">
+      Get Started <ArrowRight class="w-[18px] h-[18px]" />
     </a>
   </div>
 </section>

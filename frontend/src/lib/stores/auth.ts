@@ -4,7 +4,7 @@ export interface User {
   id: string;
   phone: string;
   name?: string;
-  role: 'renter' | 'owner' | 'driver' | 'admin';
+  role: 'consumer' | 'owner' | 'driver' | 'admin';
   avatar_url?: string;
 }
 
@@ -29,16 +29,21 @@ function createPersistedStore<T>(key: string, initial: T) {
 export const user = createPersistedStore<User | null>('yatrasathi_user', null);
 export const token = createPersistedStore<string | null>('yatrasathi_token', null);
 
-export const isAuthenticated = derived([user, token], ([$user, $token]) => {
-  return !!$user && !!$token;
-});
+export const isAuthenticated = derived([user, token], ([$user, $token]) => !!$user && !!$token);
+export const isAdmin = derived(user, ($user) => $user?.role === 'admin');
+export const isOwner = derived(user, ($user) => $user?.role === 'owner');
+export const isDriver = derived(user, ($user) => $user?.role === 'driver');
+export const isConsumer = derived(user, ($user) => $user?.role === 'consumer');
 
-export const isAdmin = derived(user, ($user) => {
-  return $user?.role === 'admin';
-});
-
-export const isOwner = derived(user, ($user) => {
-  return $user?.role === 'owner';
+export const roleLabel = derived(user, ($user) => {
+  const labels: Record<string, string> = {
+    consumer: 'Consumer',
+    owner: 'Vehicle Owner',
+    driver: 'Driver',
+    admin: 'Admin',
+    renter: 'Consumer', // backward compat
+  };
+  return labels[$user?.role || 'consumer'] || 'User';
 });
 
 export function login(newToken: string, newUser: User) {
