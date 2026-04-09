@@ -114,6 +114,55 @@ pub async fn list_users(
     (StatusCode::OK, Json(json!({ "users": users })))
 }
 
+/// GET /api/admin/vehicles - List all vehicles for admin panel
+pub async fn list_all_vehicles(
+    State(state): State<Arc<AppState>>,
+    AuthUser(claims): AuthUser,
+) -> (StatusCode, Json<Value>) {
+    if claims.role != "admin" {
+        return (
+            StatusCode::FORBIDDEN,
+            Json(json!({ "error": "Admin access required" })),
+        );
+    }
+
+    let db = state.db.lock().unwrap();
+
+    let mut stmt = db.prepare(
+        "SELECT v.id, v.owner_id, v.type, v.make, v.model, v.year, v.is_ev, v.ev_range_km, v.plate_no, v.listing_type, v.hourly_rate, v.daily_rate, v.location_name, v.available, v.created_at, u.name as owner_name FROM vehicles v LEFT JOIN users u ON v.owner_id = u.id ORDER BY v.created_at DESC"
+    ).unwrap();
+
+    let vehicles: Vec<Value> = stmt
+        .query_map([], |row| {
+            let is_ev: i32 = row.get(6)?;
+            let available: i32 = row.get(13)?;
+            Ok(json!({
+                "id": row.get::<_, String>(0)?,
+                "owner_id": row.get::<_, String>(1)?,
+                "type": row.get::<_, String>(2)?,
+                "make": row.get::<_, String>(3)?,
+                "model": row.get::<_, String>(4)?,
+                "year": row.get::<_, Option<i32>>(5)?,
+                "is_ev": is_ev == 1,
+                "ev_range_km": row.get::<_, Option<i32>>(7)?,
+                "plate_no": row.get::<_, String>(8)?,
+                "listing_type": row.get::<_, String>(9)?,
+                "hourly_rate": row.get::<_, Option<f64>>(10)?,
+                "daily_rate": row.get::<_, Option<f64>>(11)?,
+                "location": row.get::<_, String>(12)?,
+                "isAvailable": available == 1,
+                "pricePerDay": row.get::<_, Option<f64>>(11)?,
+                "created_at": row.get::<_, String>(14)?,
+                "owner_name": row.get::<_, Option<String>>(15)?
+            }))
+        })
+        .unwrap()
+        .filter_map(|r| r.ok())
+        .collect();
+
+    (StatusCode::OK, Json(json!({ "vehicles": vehicles })))
+}
+
 pub async fn list_all_bookings(
     State(state): State<Arc<AppState>>,
     AuthUser(claims): AuthUser,

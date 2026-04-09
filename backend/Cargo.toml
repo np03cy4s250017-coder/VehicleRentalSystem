@@ -16,3 +16,4 @@ uuid = { version = "1", features = ["v4"] }
 chrono = { version = "0.4", features = ["serde"] }
 rand = "0.8"
 axum-extra = { version = "0.9", features = ["typed-header"] }
+reqwest = { version = "0.12", features = ["json"] }

@@ -18,9 +18,10 @@ fn create_tables(conn: &Connection) -> Result<()> {
         CREATE TABLE IF NOT EXISTS users (
             id TEXT PRIMARY KEY,
             phone TEXT UNIQUE NOT NULL,
+            password TEXT DEFAULT '',
             name TEXT DEFAULT '',
             email TEXT DEFAULT '',
-            role TEXT DEFAULT 'renter' CHECK(role IN ('renter','driver','owner','admin')),
+            role TEXT DEFAULT 'consumer' CHECK(role IN ('consumer','driver','owner','admin')),
             lang_pref TEXT DEFAULT 'ne',
             avatar_url TEXT DEFAULT '',
             created_at TEXT DEFAULT (datetime('now'))
@@ -68,36 +69,45 @@ fn create_tables(conn: &Connection) -> Result<()> {
             id TEXT PRIMARY KEY,
             phone TEXT NOT NULL,
             code TEXT NOT NULL,
+            purpose TEXT DEFAULT 'register' CHECK(purpose IN ('register','reset','admin_2fa')),
             expires_at TEXT NOT NULL,
             used INTEGER DEFAULT 0
         );
         ",
     )?;
 
+    // Add password column if it doesn't exist (migration for existing DBs)
+    let _ = conn.execute("ALTER TABLE users ADD COLUMN password TEXT DEFAULT ''", []);
+    // Add purpose column to otp_codes if missing
+    let _ = conn.execute("ALTER TABLE otp_codes ADD COLUMN purpose TEXT DEFAULT 'register'", []);
+
     Ok(())
 }
 
 fn seed_data(conn: &Connection) -> Result<()> {
-    // Seed users
+    // Seed admin (password: admin123)
     conn.execute(
-        "INSERT OR IGNORE INTO users (id, phone, name, role) VALUES (?1, ?2, ?3, ?4)",
-        ("a1000001-0000-0000-0000-000000000001", "9841000001", "Rajesh Hamal", "admin"),
+        "INSERT OR IGNORE INTO users (id, phone, password, name, role) VALUES (?1, ?2, ?3, ?4, ?5)",
+        ("a1000001-0000-0000-0000-000000000001", "9841000001", "admin123", "Rajesh Hamal", "admin"),
+    )?;
+    // Seed owners (password: owner123)
+    conn.execute(
+        "INSERT OR IGNORE INTO users (id, phone, password, name, role) VALUES (?1, ?2, ?3, ?4, ?5)",
+        ("a1000002-0000-0000-0000-000000000002", "9841000002", "owner123", "Sita Sharma", "owner"),
     )?;
     conn.execute(
-        "INSERT OR IGNORE INTO users (id, phone, name, role) VALUES (?1, ?2, ?3, ?4)",
-        ("a1000002-0000-0000-0000-000000000002", "9841000002", "Sita Sharma", "owner"),
+        "INSERT OR IGNORE INTO users (id, phone, password, name, role) VALUES (?1, ?2, ?3, ?4, ?5)",
+        ("a1000003-0000-0000-0000-000000000003", "9841000003", "owner123", "Bikram Thapa", "owner"),
     )?;
+    // Seed driver (password: driver123)
     conn.execute(
-        "INSERT OR IGNORE INTO users (id, phone, name, role) VALUES (?1, ?2, ?3, ?4)",
-        ("a1000003-0000-0000-0000-000000000003", "9841000003", "Bikram Thapa", "owner"),
+        "INSERT OR IGNORE INTO users (id, phone, password, name, role) VALUES (?1, ?2, ?3, ?4, ?5)",
+        ("a1000004-0000-0000-0000-000000000004", "9841000004", "driver123", "Kumar Tamang", "driver"),
     )?;
+    // Seed consumer (password: user123)
     conn.execute(
-        "INSERT OR IGNORE INTO users (id, phone, name, role) VALUES (?1, ?2, ?3, ?4)",
-        ("a1000004-0000-0000-0000-000000000004", "9841000004", "Kumar Tamang", "driver"),
-    )?;
-    conn.execute(
-        "INSERT OR IGNORE INTO users (id, phone, name, role) VALUES (?1, ?2, ?3, ?4)",
-        ("a1000005-0000-0000-0000-000000000005", "9841000005", "Maya Gurung", "renter"),
+        "INSERT OR IGNORE INTO users (id, phone, password, name, role) VALUES (?1, ?2, ?3, ?4, ?5)",
+        ("a1000005-0000-0000-0000-000000000005", "9841000005", "user123", "Maya Gurung", "consumer"),
     )?;
 
     // Seed vehicles
@@ -204,12 +214,12 @@ fn seed_data(conn: &Connection) -> Result<()> {
     )?;
 
     // Seed bookings
-    let renter = "a1000005-0000-0000-0000-000000000005";
+    let consumer = "a1000005-0000-0000-0000-000000000005";
 
     conn.execute(
         "INSERT OR IGNORE INTO bookings (id, renter_id, vehicle_id, start_time, end_time, total_amount, payment_method, status, carbon_saved_kg) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9)",
         rusqlite::params![
-            "b1000001-0000-0000-0000-000000000001", renter,
+            "b1000001-0000-0000-0000-000000000001", consumer,
             "v1000001-0000-0000-0000-000000000001",
             "2024-03-15T10:00:00", "2024-03-16T10:00:00",
             12000.0, "esewa", "pending", 8.5
@@ -219,7 +229,7 @@ fn seed_data(conn: &Connection) -> Result<()> {
     conn.execute(
         "INSERT OR IGNORE INTO bookings (id, renter_id, vehicle_id, start_time, end_time, total_amount, payment_method, status, carbon_saved_kg) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9)",
         rusqlite::params![
-            "b1000002-0000-0000-0000-000000000002", renter,
+            "b1000002-0000-0000-0000-000000000002", consumer,
             "v1000005-0000-0000-0000-000000000005",
             "2024-03-10T08:00:00", "2024-03-10T18:00:00",
             1500.0, "khalti", "confirmed", 1.2
@@ -229,7 +239,7 @@ fn seed_data(conn: &Connection) -> Result<()> {
     conn.execute(
         "INSERT OR IGNORE INTO bookings (id, renter_id, vehicle_id, start_time, end_time, total_amount, payment_method, status, carbon_saved_kg) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9)",
         rusqlite::params![
-            "b1000003-0000-0000-0000-000000000003", renter,
+            "b1000003-0000-0000-0000-000000000003", consumer,
             "v1000007-0000-0000-0000-000000000007",
             "2024-03-01T10:00:00", "2024-03-03T10:00:00",
             12000.0, "cash", "completed", 0.0

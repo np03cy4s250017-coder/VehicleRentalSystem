@@ -9,6 +9,7 @@ use uuid::Uuid;
 
 use crate::middleware::auth::AuthUser;
 use crate::models::vehicle::{CreateVehicleRequest, UpdateVehicleRequest, VehicleQuery};
+use crate::models::payment::VehicleSearchRequest;
 use crate::AppState;
 
 fn row_to_vehicle(row: &rusqlite::Row) -> rusqlite::Result<Value> {
@@ -359,6 +360,92 @@ pub async fn update_vehicle(
             Json(json!({ "error": format!("Failed to update vehicle: {}", e) })),
         ),
     }
+}
+
+/// POST /api/vehicles/search
+/// Search vehicles with filters (type, rate, range, location) - matches website API spec
+pub async fn search_vehicles(
+    State(state): State<Arc<AppState>>,
+    Json(payload): Json<VehicleSearchRequest>,
+) -> (StatusCode, Json<Value>) {
+    let db = state.db.lock().unwrap();
+
+    let mut sql = String::from(
+        "SELECT id, owner_id, type, make, model, year, is_ev, ev_range_km, plate_no, listing_type, hourly_rate, daily_rate, description, image_url, location_name, latitude, longitude, verified_at, available, features, created_at FROM vehicles WHERE available = 1"
+    );
+    let mut params: Vec<Box<dyn rusqlite::types::ToSql>> = Vec::new();
+    let mut param_idx = 1;
+
+    if let Some(ref vtype) = payload.vehicle_type {
+        sql.push_str(&format!(" AND type = ?{}", param_idx));
+        params.push(Box::new(vtype.clone()));
+        param_idx += 1;
+    }
+
+    if let Some(is_ev) = payload.is_ev {
+        sql.push_str(&format!(" AND is_ev = ?{}", param_idx));
+        params.push(Box::new(if is_ev { 1i32 } else { 0i32 }));
+        param_idx += 1;
+    }
+
+    if let Some(min_rate) = payload.min_rate {
+        sql.push_str(&format!(" AND daily_rate >= ?{}", param_idx));
+        params.push(Box::new(min_rate));
+        param_idx += 1;
+    }
+
+    if let Some(max_rate) = payload.max_rate {
+        sql.push_str(&format!(" AND daily_rate <= ?{}", param_idx));
+        params.push(Box::new(max_rate));
+        param_idx += 1;
+    }
+
+    if let Some(min_range) = payload.min_range {
+        sql.push_str(&format!(" AND ev_range_km >= ?{}", param_idx));
+        params.push(Box::new(min_range));
+        param_idx += 1;
+    }
+
+    if let Some(ref location) = payload.location {
+        sql.push_str(&format!(" AND location_name LIKE ?{}", param_idx));
+        params.push(Box::new(format!("%{}%", location)));
+        param_idx += 1;
+    }
+
+    if let Some(ref query) = payload.query {
+        sql.push_str(&format!(
+            " AND (make LIKE ?{p} OR model LIKE ?{p} OR description LIKE ?{p})",
+            p = param_idx
+        ));
+        params.push(Box::new(format!("%{}%", query)));
+        let _ = param_idx;
+    }
+
+    sql.push_str(" ORDER BY created_at DESC");
+
+    let param_refs: Vec<&dyn rusqlite::types::ToSql> = params.iter().map(|p| p.as_ref()).collect();
+
+    let mut stmt = match db.prepare(&sql) {
+        Ok(s) => s,
+        Err(e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({ "error": format!("Query error: {}", e) })),
+            );
+        }
+    };
+
+    let vehicles: Vec<Value> = match stmt.query_map(param_refs.as_slice(), |row| row_to_vehicle(row)) {
+        Ok(rows) => rows.filter_map(|r| r.ok()).collect(),
+        Err(e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({ "error": format!("Query error: {}", e) })),
+            );
+        }
+    };
+
+    (StatusCode::OK, Json(json!({ "vehicles": vehicles, "count": vehicles.len() })))
 }
 
 pub async fn delete_vehicle(
