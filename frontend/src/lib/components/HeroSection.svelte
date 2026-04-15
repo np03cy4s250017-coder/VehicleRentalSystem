@@ -48,7 +48,7 @@
       Rent electric vehicles across Kathmandu Valley. Sustainable, affordable, and ready for your next adventure.
     </p>
 
-    <!-- Search Bar -->
+
     <div class="max-w-4xl mx-auto mt-12 bg-white rounded-2xl p-4 shadow-2xl shadow-black/10">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div class="relative">
@@ -88,7 +88,7 @@
       </div>
     </div>
 
-    <!-- Stats -->
+
     <div class="flex flex-wrap items-center justify-center gap-12 md:gap-20 mt-16">
       <div class="text-center">
         <span class="block font-display text-4xl md:text-5xl text-paper tracking-wide">500+</span>

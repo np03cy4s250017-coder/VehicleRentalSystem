@@ -196,7 +196,7 @@
 
 <div class="min-h-screen bg-paper">
 
-  <!-- ━━━ TAB NAVIGATION ━━━ -->
+
   <div class="bg-white border-b border-ink/[0.04] sticky top-16 z-30">
     <div class="max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-between">
       <div class="flex items-center gap-0.5">
@@ -233,7 +233,7 @@
     </div>
   </div>
 
-  <!-- ━━━ TOAST MESSAGES ━━━ -->
+
   {#if actionSuccess || actionError}
     <div class="max-w-7xl mx-auto px-6 lg:px-8 pt-5">
       {#if actionSuccess}
@@ -252,18 +252,18 @@
     </div>
   {/if}
 
-  <!-- ━━━ LOADING ━━━ -->
+
   {#if loading}
     <div class="flex flex-col items-center justify-center py-32">
       <Loader2 class="w-8 h-8 text-sage animate-spin mb-4" />
       <p class="text-[15px] text-ink/30">Loading admin data...</p>
     </div>
 
-  <!-- ═══════════════════ OVERVIEW TAB ═══════════════════ -->
+
   {:else if activeView === 'overview'}
     <div class="max-w-7xl mx-auto px-6 lg:px-8 py-8">
 
-      <!-- Welcome Banner -->
+
       <div class="flex items-center justify-between mb-8">
         <div>
           <p class="text-[13px] font-mono uppercase tracking-wider text-ink/25 mb-1">Welcome back</p>
@@ -277,10 +277,10 @@
         </div>
       </div>
 
-      <!-- 4 Large Stat Cards -->
+
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
 
-        <!-- Bookings -->
+
         <button onclick={() => activeView = 'bookings'}
           class="group bg-white rounded-2xl p-6 border border-ink/[0.04] shadow-sm text-left hover:shadow-md hover:border-ink/[0.08] transition-all">
           <div class="flex items-center justify-between mb-5">
@@ -299,7 +299,7 @@
           {/if}
         </button>
 
-        <!-- Revenue -->
+
         <div class="bg-white rounded-2xl p-6 border border-ink/[0.04] shadow-sm">
           <div class="flex items-center justify-between mb-5">
             <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-sage/20 to-sage/5 flex items-center justify-center">
@@ -317,7 +317,7 @@
           </div>
         </div>
 
-        <!-- Vehicles -->
+
         <button onclick={() => activeView = 'vehicles'}
           class="group bg-white rounded-2xl p-6 border border-ink/[0.04] shadow-sm text-left hover:shadow-md hover:border-ink/[0.08] transition-all">
           <div class="flex items-center justify-between mb-5">
@@ -334,7 +334,7 @@
           </div>
         </button>
 
-        <!-- Users -->
+
         <button onclick={() => activeView = 'users'}
           class="group bg-white rounded-2xl p-6 border border-ink/[0.04] shadow-sm text-left hover:shadow-md hover:border-ink/[0.08] transition-all">
           <div class="flex items-center justify-between mb-5">
@@ -348,7 +348,7 @@
         </button>
       </div>
 
-      <!-- Mini Stat Pills -->
+
       <div class="flex flex-wrap gap-3 mb-8">
         <div class="flex items-center gap-2.5 px-5 py-2.5 bg-white rounded-xl border border-ink/[0.04] shadow-sm">
           <Activity class="w-4.5 h-4.5 text-sage" />
@@ -367,10 +367,10 @@
         </div>
       </div>
 
-      <!-- Two-Column: Pending + Activity -->
+
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
-        <!-- Pending Approval Panel -->
+
         <div class="lg:col-span-3 bg-white rounded-2xl border border-ink/[0.04] shadow-sm overflow-hidden">
           <div class="flex items-center justify-between px-6 py-5 border-b border-ink/[0.04]">
             <div class="flex items-center gap-3">
@@ -434,7 +434,7 @@
           {/if}
         </div>
 
-        <!-- Recent Activity Timeline -->
+
         <div class="lg:col-span-2 bg-white rounded-2xl border border-ink/[0.04] shadow-sm overflow-hidden">
           <div class="px-6 py-5 border-b border-ink/[0.04]">
             <h2 class="text-[16px] font-semibold text-ink">Recent Activity</h2>
@@ -472,7 +472,7 @@
       </div>
     </div>
 
-  <!-- ═══════════════════ BOOKINGS TAB ═══════════════════ -->
+
   {:else if activeView === 'bookings'}
     <div class="max-w-7xl mx-auto px-6 lg:px-8 py-8">
       <div class="mb-6">
@@ -562,7 +562,7 @@
       {/if}
     </div>
 
-  <!-- ═══════════════════ VEHICLES TAB ═══════════════════ -->
+
   {:else if activeView === 'vehicles'}
     <div class="max-w-7xl mx-auto px-6 lg:px-8 py-8">
       <div class="flex items-center justify-between mb-6">
@@ -591,7 +591,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {#each vehicles as v}
             <div class="bg-white rounded-2xl border border-ink/[0.04] shadow-sm overflow-hidden hover:shadow-md hover:border-ink/[0.08] transition-all group">
-              <!-- Image -->
+
               <div class="relative h-44 bg-ink/[0.02]">
                 <img
                   src={v.image_url || 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=400&h=200&fit=crop'}
@@ -617,7 +617,7 @@
                 </div>
               </div>
 
-              <!-- Details -->
+
               <div class="p-5">
                 <h3 class="text-[16px] font-semibold text-ink">{v.make} {v.model}</h3>
                 <p class="text-[13px] text-ink/30 mt-1 flex items-center gap-1.5">
@@ -667,7 +667,7 @@
       {/if}
     </div>
 
-  <!-- ═══════════════════ USERS TAB ═══════════════════ -->
+
   {:else if activeView === 'users'}
     <div class="max-w-7xl mx-auto px-6 lg:px-8 py-8">
       <div class="mb-6">
@@ -729,7 +729,7 @@
   {/if}
 </div>
 
-<!-- ═══════════════════ ADD VEHICLE MODAL ═══════════════════ -->
+
 {#if showAddVehicle}
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -741,7 +741,7 @@
     <div class="relative bg-white rounded-2xl w-full max-w-lg shadow-2xl"
       onclick={(e) => e.stopPropagation()}>
 
-      <!-- Modal Header -->
+
       <div class="flex items-center justify-between px-6 py-5 border-b border-ink/[0.04]">
         <h2 class="text-[16px] font-semibold text-ink">Add New Vehicle</h2>
         <button onclick={() => showAddVehicle = false}
@@ -750,9 +750,9 @@
         </button>
       </div>
 
-      <!-- Modal Body -->
+
       <div class="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
-        <!-- Type + EV -->
+
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-[13px] font-semibold text-ink/40 mb-2">Type</label>
@@ -782,7 +782,7 @@
           </div>
         </div>
 
-        <!-- Make + Model -->
+
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-[13px] font-semibold text-ink/40 mb-2">Make</label>
@@ -796,7 +796,7 @@
           </div>
         </div>
 
-        <!-- Year + Plate -->
+
         <div class="grid grid-cols-3 gap-4">
           <div>
             <label class="block text-[13px] font-semibold text-ink/40 mb-2">Year</label>
@@ -810,7 +810,7 @@
           </div>
         </div>
 
-        <!-- EV Range -->
+
         {#if newVehicle.is_ev}
           <div>
             <label class="block text-[13px] font-semibold text-ink/40 mb-2">EV Range (km)</label>
@@ -819,7 +819,7 @@
           </div>
         {/if}
 
-        <!-- Rates -->
+
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-[13px] font-semibold text-ink/40 mb-2">Hourly Rate (NPR)</label>
@@ -833,7 +833,7 @@
           </div>
         </div>
 
-        <!-- Location -->
+
         <div>
           <label class="block text-[13px] font-semibold text-ink/40 mb-2">Location</label>
           <select bind:value={newVehicle.location_name}
@@ -847,7 +847,7 @@
           </select>
         </div>
 
-        <!-- Description -->
+
         <div>
           <label class="block text-[13px] font-semibold text-ink/40 mb-2">Description</label>
           <textarea bind:value={newVehicle.description} rows="2" placeholder="Brief description of the vehicle..."
@@ -855,14 +855,14 @@
           </textarea>
         </div>
 
-        <!-- Image URL -->
+
         <div>
           <label class="block text-[13px] font-semibold text-ink/40 mb-2">Image URL</label>
           <input bind:value={newVehicle.image_url} placeholder="https://..."
             class="w-full px-4 py-3 bg-paper border border-ink/[0.06] rounded-xl text-[15px] focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/10 placeholder:text-ink/20" />
         </div>
 
-        <!-- Features -->
+
         <div>
           <label class="block text-[13px] font-semibold text-ink/40 mb-2">Features</label>
           <div class="flex gap-2 mb-3">
@@ -893,7 +893,7 @@
         {/if}
       </div>
 
-      <!-- Modal Footer -->
+
       <div class="px-6 py-5 border-t border-ink/[0.04] flex items-center justify-end gap-3">
         <button onclick={() => showAddVehicle = false}
           class="px-5 py-2.5 text-[14px] text-ink/40 hover:text-ink/60 font-medium transition-colors">

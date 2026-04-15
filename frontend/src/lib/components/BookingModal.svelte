@@ -99,7 +99,7 @@
       class="relative bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto border border-ink/5"
       onclick={(e) => e.stopPropagation()}
     >
-      <!-- Header -->
+
       <div class="flex items-center justify-between p-4 border-b border-ink/5">
         <h2 class="text-sm font-semibold text-ink">Book Vehicle</h2>
         <button onclick={handleClose} class="p-1 hover:bg-paper rounded-lg transition-colors">
@@ -125,7 +125,7 @@
         </div>
       {:else}
         <div class="p-4 space-y-4">
-          <!-- Vehicle Info -->
+
           <div class="bg-paper rounded-lg p-3">
             <p class="text-sm font-medium text-ink">{vehicle.make} {vehicle.model}</p>
             <p class="text-xs text-ink/40 mt-0.5">
@@ -133,7 +133,7 @@
             </p>
           </div>
 
-          <!-- Dates -->
+
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label for="start-date" class="block text-xs font-medium text-ink/50 mb-1">Start Date</label>
@@ -163,7 +163,7 @@
             </div>
           </div>
 
-          <!-- Payment -->
+
           <div>
             <label for="payment" class="block text-xs font-medium text-ink/50 mb-1">Payment Method</label>
             <div class="relative">
@@ -180,7 +180,7 @@
             </div>
           </div>
 
-          <!-- Total -->
+
           {#if totalDays() > 0}
             <div class="bg-sage/5 border border-sage/10 rounded-lg p-3">
               <div class="flex items-center justify-between text-xs text-ink/50">

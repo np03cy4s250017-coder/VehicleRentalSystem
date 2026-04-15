@@ -71,7 +71,7 @@
 <div class="pt-16 pb-20 bg-paper min-h-screen">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    <!-- Welcome Header -->
+
     <div class="mb-8 pt-4">
       <p class="text-[13px] font-mono uppercase tracking-wider text-ink/25 mb-1">Welcome back</p>
       <h1 class="font-display text-4xl text-ink tracking-wide">{$user?.name || 'USER'}</h1>
@@ -85,7 +85,7 @@
       </div>
     {:else}
 
-      <!-- Stat Cards -->
+
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
         <div class="bg-white rounded-2xl p-6 border border-ink/[0.04] shadow-sm">
           <div class="flex items-center justify-between mb-4">
@@ -130,10 +130,10 @@
         </div>
       </div>
 
-      <!-- Two Column Layout -->
+
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        <!-- My Vehicles -->
+
         <div class="bg-white rounded-2xl border border-ink/[0.04] shadow-sm overflow-hidden">
           <div class="flex items-center justify-between px-6 py-4 border-b border-ink/[0.04]">
             <h2 class="text-[15px] font-semibold text-ink">My Vehicles</h2>
@@ -179,7 +179,7 @@
           </div>
         </div>
 
-        <!-- Recent Bookings -->
+
         <div class="bg-white rounded-2xl border border-ink/[0.04] shadow-sm overflow-hidden">
           <div class="flex items-center justify-between px-6 py-4 border-b border-ink/[0.04]">
             <h2 class="text-[15px] font-semibold text-ink">Recent Bookings</h2>

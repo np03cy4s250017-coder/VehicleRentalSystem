@@ -1,10 +1,11 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
   import { isAuthenticated } from '$lib/stores/auth';
-  import { createBooking, verifyEsewaPayment, verifyKhaltiPayment } from '$lib/api';
+  import { createBooking, verifyEsewaPayment, verifyKhaltiPayment, getVehicleReviews, createReview } from '$lib/api';
   import {
     ArrowLeft, MapPin, Zap, Calendar, User, Battery, Hash,
-    Tag, CheckCircle, Clock, Car, Loader2, CreditCard, Banknote, Wallet
+    Tag, CheckCircle, Clock, Car, Loader2, CreditCard, Banknote, Wallet, Star
   } from 'lucide-svelte';
 
   let { data } = $props();
@@ -31,6 +32,45 @@
   });
 
   let totalAmount = $derived(totalDays * (vehicle?.daily_rate || 0));
+
+  let reviews = $state<any[]>([]);
+  let reviewAvg = $state(0);
+  let reviewCount = $state(0);
+  let myRating = $state(5);
+  let myComment = $state('');
+  let reviewSubmitting = $state(false);
+  let reviewError = $state('');
+
+  onMount(async () => {
+    if (!vehicle?.id) return;
+    await loadReviews();
+  });
+
+  async function loadReviews() {
+    try {
+      const res = await getVehicleReviews(vehicle.id);
+      reviews = res.reviews || [];
+      reviewAvg = res.average_rating || 0;
+      reviewCount = res.count || 0;
+    } catch { /* non-fatal */ }
+  }
+
+  async function submitReview() {
+    let authed = false;
+    isAuthenticated.subscribe((v) => authed = v)();
+    if (!authed) { goto('/auth'); return; }
+    reviewSubmitting = true;
+    reviewError = '';
+    try {
+      const res = await createReview({ vehicleId: vehicle.id, rating: myRating, comment: myComment });
+      if (res.error) { reviewError = res.error; }
+      else { myComment = ''; myRating = 5; await loadReviews(); }
+    } catch {
+      reviewError = 'Failed to submit review';
+    } finally {
+      reviewSubmitting = false;
+    }
+  }
 
   const placeholderImages: Record<string, string> = {
     car: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800&h=500&fit=crop',
@@ -138,7 +178,7 @@
 
 <div class="pt-16 pb-20 bg-paper min-h-screen">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- Back navigation -->
+
     <a
       href="/"
       class="inline-flex items-center gap-2 text-[15px] text-ink/35 hover:text-ink transition-colors mb-8 group"
@@ -149,10 +189,10 @@
 
     {#if vehicle}
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Left Column: Vehicle Details -->
+
         <div class="lg:col-span-2 space-y-6">
 
-          <!-- Hero Image -->
+
           <div class="relative rounded-2xl overflow-hidden bg-ink/5 aspect-[16/9] shadow-sm">
             <img
               src={getImage(vehicle)}
@@ -178,7 +218,7 @@
             {/if}
           </div>
 
-          <!-- Vehicle Info Card -->
+
           <div class="bg-white rounded-2xl p-8 border border-ink/[0.04] shadow-sm">
             <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
               <div>
@@ -204,7 +244,7 @@
               </div>
             {/if}
 
-            <!-- Specs Grid -->
+
             <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div class="bg-paper rounded-xl p-4">
                 <Car class="w-5 h-5 text-ink/25 mb-2" />
@@ -235,7 +275,7 @@
             </div>
           </div>
 
-          <!-- Owner Card -->
+
           {#if vehicle.owner}
             <div class="bg-white rounded-2xl p-6 border border-ink/[0.04] shadow-sm">
               <h3 class="text-[13px] font-mono uppercase tracking-wider text-ink/30 mb-4">Listed By</h3>
@@ -251,7 +291,7 @@
             </div>
           {/if}
 
-          <!-- Location Card -->
+
           <div class="bg-white rounded-2xl p-6 border border-ink/[0.04] shadow-sm">
             <h3 class="text-[13px] font-mono uppercase tracking-wider text-ink/30 mb-4">Location</h3>
             <div class="bg-sage/[0.04] rounded-xl h-48 flex items-center justify-center border border-sage/10">
@@ -262,13 +302,76 @@
               </div>
             </div>
           </div>
+
+          <div class="bg-white rounded-2xl p-6 border border-ink/[0.04] shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-[13px] font-mono uppercase tracking-wider text-ink/30">Reviews</h3>
+              {#if reviewCount > 0}
+                <div class="flex items-center gap-1 text-[14px] text-ink/60">
+                  <Star class="w-4 h-4 fill-saffron text-saffron" />
+                  <span class="font-semibold">{reviewAvg.toFixed(1)}</span>
+                  <span class="text-ink/35">({reviewCount})</span>
+                </div>
+              {/if}
+            </div>
+
+            {#if reviews.length === 0}
+              <p class="text-[14px] text-ink/35 mb-4">No reviews yet. Be the first.</p>
+            {:else}
+              <ul class="space-y-4 mb-6">
+                {#each reviews as r (r.id)}
+                  <li class="pb-4 border-b border-ink/[0.06] last:border-0">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="text-[14px] font-semibold text-ink">{r.user?.name || 'Anonymous'}</span>
+                      <div class="flex gap-0.5">
+                        {#each Array(5) as _, i}
+                          <Star class="w-3.5 h-3.5 {i < r.rating ? 'fill-saffron text-saffron' : 'text-ink/15'}" />
+                        {/each}
+                      </div>
+                    </div>
+                    {#if r.comment}
+                      <p class="text-[14px] text-ink/60">{r.comment}</p>
+                    {/if}
+                    <p class="text-[12px] text-ink/25 mt-1">{r.created_at?.split(' ')[0]}</p>
+                  </li>
+                {/each}
+              </ul>
+            {/if}
+
+            <div class="pt-4 border-t border-ink/[0.06] space-y-3">
+              <p class="text-[13px] font-semibold text-ink/45">Leave a review</p>
+              <div class="flex gap-1">
+                {#each [1,2,3,4,5] as n}
+                  <button type="button" onclick={() => myRating = n} aria-label={`${n} stars`} class="p-1">
+                    <Star class="w-6 h-6 {n <= myRating ? 'fill-saffron text-saffron' : 'text-ink/20'}" />
+                  </button>
+                {/each}
+              </div>
+              <textarea
+                bind:value={myComment}
+                placeholder="Share your experience..."
+                rows="3"
+                class="w-full px-4 py-3 bg-paper border border-ink/[0.06] rounded-xl text-[14px] focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/10"
+              ></textarea>
+              {#if reviewError}
+                <p class="text-[13px] text-crimson">{reviewError}</p>
+              {/if}
+              <button
+                onclick={submitReview}
+                disabled={reviewSubmitting}
+                class="px-5 py-2.5 bg-ink text-paper text-[14px] font-semibold rounded-xl hover:bg-ink/90 disabled:opacity-50 transition"
+              >
+                {reviewSubmitting ? 'Submitting...' : 'Submit review'}
+              </button>
+            </div>
+          </div>
         </div>
 
-        <!-- Right Sidebar: Booking -->
+
         <div class="lg:col-span-1">
           <div class="bg-white rounded-2xl p-6 border border-ink/[0.04] shadow-sm sticky top-24">
 
-            <!-- Success State -->
+
             {#if bookingSuccess}
               <div class="text-center py-8">
                 <div class="inline-flex items-center justify-center w-16 h-16 bg-sage/10 rounded-2xl mb-4">
@@ -295,7 +398,7 @@
                 </a>
               </div>
 
-            <!-- Payment Step -->
+
             {:else if paymentStep}
               <div class="space-y-5">
                 <div class="text-center">
@@ -356,9 +459,9 @@
                 </button>
               </div>
 
-            <!-- Booking Form -->
+
             {:else}
-              <!-- Pricing -->
+
               <div class="mb-6">
                 <h3 class="text-[13px] font-mono uppercase tracking-wider text-ink/30 mb-4">Pricing</h3>
                 <div class="space-y-3">
@@ -381,7 +484,7 @@
 
               <hr class="border-ink/[0.06] mb-6" />
 
-              <!-- Booking Form -->
+
               <div class="space-y-4">
                 <div>
                   <label for="detail-start" class="block text-[13px] font-semibold text-ink/45 mb-2">Start Date</label>
@@ -404,7 +507,7 @@
                   />
                 </div>
 
-                <!-- Payment Method -->
+
                 <div>
                   <label class="block text-[13px] font-semibold text-ink/45 mb-2">Payment Method</label>
                   <div class="grid grid-cols-3 gap-3">
@@ -438,7 +541,7 @@
                   </div>
                 </div>
 
-                <!-- Total Calculation -->
+
                 {#if totalDays > 0}
                   <div class="bg-sage/[0.05] border border-sage/10 rounded-xl p-5">
                     <div class="flex items-center justify-between text-[14px] text-ink/40 mb-2">
@@ -480,7 +583,7 @@
         </div>
       </div>
     {:else}
-      <!-- Vehicle Not Found -->
+
       <div class="text-center py-24">
         <div class="inline-flex items-center justify-center w-20 h-20 bg-ink/[0.03] rounded-2xl mb-6">
           <Car class="w-10 h-10 text-ink/15" />

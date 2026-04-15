@@ -10,7 +10,7 @@
   let selectedRole = $state('');
   let isSignup = $state(false);
 
-  // Form fields
+
   let phone = $state('');
   let password = $state('');
   let name = $state('');
@@ -18,7 +18,7 @@
   let newPassword = $state('');
   let showPassword = $state(false);
 
-  // State
+
   let loading = $state(false);
   let error = $state('');
   let devOtp = $state('');
@@ -90,7 +90,7 @@
     error = ''; phone = ''; password = ''; name = '';
   }
 
-  // ─── Login ────────────────────────────────────────────
+
   async function handleLogin() {
     if (!phone || phone.length < 10) { error = 'Enter a valid phone number'; return; }
     if (!password || password.length < 4) { error = 'Enter your password'; return; }
@@ -109,7 +109,7 @@
     finally { loading = false; }
   }
 
-  // ─── Admin OTP verify ─────────────────────────────────
+
   async function handleAdminOtp() {
     if (!otp || otp.length < 4) { error = 'Enter the OTP'; return; }
     loading = true; error = '';
@@ -123,7 +123,7 @@
     finally { loading = false; }
   }
 
-  // ─── Register ─────────────────────────────────────────
+
   async function handleRegister() {
     if (!name || name.length < 2) { error = 'Enter your full name'; return; }
     if (!phone || phone.length < 10) { error = 'Enter a valid phone number'; return; }
@@ -141,7 +141,7 @@
     finally { loading = false; }
   }
 
-  // ─── Verify registration OTP ──────────────────────────
+
   async function handleVerifyRegistration() {
     if (!otp || otp.length < 4) { error = 'Enter the OTP'; return; }
     loading = true; error = '';
@@ -155,7 +155,7 @@
     finally { loading = false; }
   }
 
-  // ─── Password Reset ───────────────────────────────────
+
   async function handleResetRequest() {
     if (!phone || phone.length < 10) { error = 'Enter your phone number'; return; }
     loading = true; error = '';
@@ -198,14 +198,14 @@
 </svelte:head>
 
 <div class="min-h-screen pt-14 flex items-center justify-center bg-ink px-4 py-16 relative overflow-hidden">
-  <!-- Background decoration -->
+
   <div class="absolute inset-0 overflow-hidden pointer-events-none">
     <div class="absolute top-1/4 -left-32 w-96 h-96 bg-sage/[0.03] rounded-full blur-3xl"></div>
     <div class="absolute bottom-1/4 -right-32 w-96 h-96 bg-saffron/[0.03] rounded-full blur-3xl"></div>
   </div>
 
   <div class="relative w-full max-w-md z-10">
-    <!-- Logo -->
+
     <div class="text-center mb-10">
       <div class="flex items-center justify-center gap-2 mb-3">
         <span class="font-display text-4xl tracking-wide text-paper">YATRA</span>
@@ -216,10 +216,10 @@
       </p>
     </div>
 
-    <!-- Card -->
+
     <div class="bg-white rounded-2xl p-8 shadow-xl shadow-black/20">
 
-      <!-- ═══ ROLE SELECTION ═══ -->
+
       {#if mode === 'select-role'}
         <div class="text-center mb-6">
           <h2 class="font-display text-2xl text-ink tracking-wide">
@@ -260,7 +260,7 @@
           {/if}
         </div>
 
-      <!-- ═══ LOGIN FORM ═══ -->
+
       {:else if mode === 'login'}
         <div class="flex items-center gap-3 mb-6">
           <button onclick={goBack} class="p-2 hover:bg-paper rounded-xl transition-colors">
@@ -317,7 +317,7 @@
           </div>
         </div>
 
-      <!-- ═══ ADMIN 2FA OTP ═══ -->
+
       {:else if mode === 'admin-otp'}
         <div class="flex items-center gap-3 mb-6">
           <button onclick={goBack} class="p-2 hover:bg-paper rounded-xl transition-colors">
@@ -360,7 +360,7 @@
           </button>
         </div>
 
-      <!-- ═══ SIGNUP FORM ═══ -->
+
       {:else if mode === 'signup'}
         <div class="flex items-center gap-3 mb-6">
           <button onclick={goBack} class="p-2 hover:bg-paper rounded-xl transition-colors">
@@ -417,7 +417,7 @@
           </p>
         </div>
 
-      <!-- ═══ SIGNUP OTP VERIFY ═══ -->
+
       {:else if mode === 'signup-otp'}
         <div class="flex items-center gap-3 mb-6">
           <button onclick={goBack} class="p-2 hover:bg-paper rounded-xl transition-colors">
@@ -460,7 +460,7 @@
           </button>
         </div>
 
-      <!-- ═══ RESET PASSWORD REQUEST ═══ -->
+
       {:else if mode === 'reset'}
         <div class="flex items-center gap-3 mb-6">
           <button onclick={goBack} class="p-2 hover:bg-paper rounded-xl transition-colors">
@@ -501,7 +501,7 @@
           </button>
         </div>
 
-      <!-- ═══ RESET PASSWORD VERIFY ═══ -->
+
       {:else if mode === 'reset-otp'}
         <div class="flex items-center gap-3 mb-6">
           <button onclick={goBack} class="p-2 hover:bg-paper rounded-xl transition-colors">

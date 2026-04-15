@@ -41,7 +41,7 @@ export const roleLabel = derived(user, ($user) => {
     owner: 'Vehicle Owner',
     driver: 'Driver',
     admin: 'Admin',
-    renter: 'Consumer', // backward compat
+    renter: 'Consumer',
   };
   return labels[$user?.role || 'consumer'] || 'User';
 });

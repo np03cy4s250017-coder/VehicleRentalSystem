@@ -23,7 +23,11 @@
 
       <div class="hidden md:flex items-center gap-8">
         <a href="/" class="text-[15px] font-medium transition-colors {$page.url.pathname === '/' ? 'text-ink' : 'text-ink/40 hover:text-ink'}">Home</a>
-        <a href="/#vehicles" class="text-[15px] font-medium text-ink/40 hover:text-ink transition-colors">Vehicles</a>
+        {#if !$isOwner}
+          <a href="/#vehicles" class="text-[15px] font-medium text-ink/40 hover:text-ink transition-colors">Vehicles</a>
+          <a href="/bundles" class="text-[15px] font-medium transition-colors {$page.url.pathname === '/bundles' ? 'text-ink' : 'text-ink/40 hover:text-ink'}">Bundles</a>
+          <a href="/drivers" class="text-[15px] font-medium transition-colors {$page.url.pathname === '/drivers' ? 'text-ink' : 'text-ink/40 hover:text-ink'}">Drivers</a>
+        {/if}
         {#if $isAuthenticated}
           <a href="/bookings" class="text-[15px] font-medium transition-colors {$page.url.pathname === '/bookings' ? 'text-ink' : 'text-ink/40 hover:text-ink'}">Bookings</a>
           {#if $isOwner}
@@ -93,7 +97,11 @@
     <div class="md:hidden bg-paper border-t border-ink/5">
       <div class="px-5 py-4 space-y-1">
         <a href="/" onclick={closeMobile} class="block px-4 py-2.5 rounded-xl text-[15px] font-medium text-ink/70 hover:bg-ink/5">Home</a>
-        <a href="/#vehicles" onclick={closeMobile} class="block px-4 py-2.5 rounded-xl text-[15px] font-medium text-ink/70 hover:bg-ink/5">Vehicles</a>
+        {#if !$isOwner}
+          <a href="/#vehicles" onclick={closeMobile} class="block px-4 py-2.5 rounded-xl text-[15px] font-medium text-ink/70 hover:bg-ink/5">Vehicles</a>
+          <a href="/bundles" onclick={closeMobile} class="block px-4 py-2.5 rounded-xl text-[15px] font-medium text-ink/70 hover:bg-ink/5">Bundles</a>
+          <a href="/drivers" onclick={closeMobile} class="block px-4 py-2.5 rounded-xl text-[15px] font-medium text-ink/70 hover:bg-ink/5">Drivers</a>
+        {/if}
         {#if $isAuthenticated}
           <a href="/bookings" onclick={closeMobile} class="block px-4 py-2.5 rounded-xl text-[15px] font-medium text-ink/70 hover:bg-ink/5">Bookings</a>
           <a href="/dashboard" onclick={closeMobile} class="block px-4 py-2.5 rounded-xl text-[15px] font-medium text-ink/70 hover:bg-ink/5">Dashboard</a>

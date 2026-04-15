@@ -24,7 +24,7 @@
 
   function onHeroSearch(filters: { type: string; location: string }) {
     if (filters.type) vehicleType = filters.type;
-    // location filtering can be added when backend supports it
+
   }
 </script>
 

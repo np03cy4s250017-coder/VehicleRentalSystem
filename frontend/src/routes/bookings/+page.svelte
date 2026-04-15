@@ -63,20 +63,20 @@
 
 <div class="pt-16 pb-20 bg-paper min-h-screen">
   <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- Header -->
+
     <div class="mb-8 pt-4">
       <h1 class="font-display text-4xl text-ink tracking-wide">MY BOOKINGS</h1>
       <p class="text-[15px] text-ink/35 mt-2">Track and manage all your vehicle rentals in one place</p>
     </div>
 
-    <!-- Loading State -->
+
     {#if loading}
       <div class="flex flex-col items-center justify-center py-24">
         <Loader2 class="w-8 h-8 text-sage animate-spin mb-4" />
         <p class="text-[15px] text-ink/30">Loading your bookings...</p>
       </div>
 
-    <!-- Error State -->
+
     {:else if error}
       <div class="text-center py-24">
         <div class="inline-flex items-center justify-center w-16 h-16 bg-crimson/5 rounded-2xl mb-4">
@@ -91,7 +91,7 @@
         </button>
       </div>
 
-    <!-- Empty State -->
+
     {:else if bookings.length === 0}
       <div class="text-center py-24">
         <div class="inline-flex items-center justify-center w-20 h-20 bg-ink/[0.03] rounded-2xl mb-6">
@@ -110,14 +110,14 @@
         </a>
       </div>
 
-    <!-- Bookings List -->
+
     {:else}
       <div class="space-y-4">
         {#each bookings as booking}
           {@const style = statusStyles[booking.status] || statusStyles.pending}
           <div class="bg-white rounded-2xl border border-ink/[0.04] shadow-sm overflow-hidden hover:shadow-md hover:border-ink/[0.08] transition-all">
             <div class="flex flex-col sm:flex-row">
-              <!-- Vehicle Image -->
+
               <div class="sm:w-52 h-40 sm:h-auto bg-ink/[0.02] shrink-0 relative">
                 <img
                   src={booking.vehicle?.image_url || 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=400&h=300&fit=crop'}
@@ -132,7 +132,7 @@
                 {/if}
               </div>
 
-              <!-- Booking Details -->
+
               <div class="flex-1 p-6">
                 <div class="flex items-start justify-between gap-4">
                   <div class="min-w-0">
@@ -148,13 +148,13 @@
                     {/if}
                   </div>
 
-                  <!-- Status Badge -->
+
                   <span class="px-3 py-1 text-[12px] font-semibold tracking-wider uppercase rounded-full border shrink-0 {style.bg}">
                     {booking.status || 'pending'}
                   </span>
                 </div>
 
-                <!-- Info Row -->
+
                 <div class="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4">
                   <span class="flex items-center gap-2 text-[14px] text-ink/40">
                     <Calendar class="w-4 h-4 text-ink/25" />
@@ -166,7 +166,7 @@
                   </span>
                 </div>
 
-                <!-- Bottom row: Amount -->
+
                 <div class="mt-5 pt-4 border-t border-ink/[0.04] flex items-center justify-between">
                   <span class="text-[14px] text-ink/30">Total Amount</span>
                   <span class="font-display text-2xl text-ink tracking-wide">

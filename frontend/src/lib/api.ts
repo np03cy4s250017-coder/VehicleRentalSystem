@@ -17,7 +17,7 @@ async function apiFetch(endpoint: string, options: RequestInit = {}): Promise<Re
   return fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
 }
 
-// ─── Auth: Login (phone + password) ─────────────────────
+
 export async function loginWithPassword(phone: string, password: string) {
   const res = await apiFetch('/auth/login', {
     method: 'POST',
@@ -26,7 +26,7 @@ export async function loginWithPassword(phone: string, password: string) {
   return res.json();
 }
 
-// Admin 2FA: verify OTP after password
+
 export async function verifyAdminOtp(phone: string, otp: string) {
   const res = await apiFetch('/auth/login/verify-otp', {
     method: 'POST',
@@ -35,7 +35,7 @@ export async function verifyAdminOtp(phone: string, otp: string) {
   return res.json();
 }
 
-// ─── Auth: Register ─────────────────────────────────────
+
 export async function registerAccount(data: { phone: string; password: string; name: string; role: string }) {
   const res = await apiFetch('/auth/register', {
     method: 'POST',
@@ -52,7 +52,7 @@ export async function verifyRegistration(data: { phone: string; otp: string; nam
   return res.json();
 }
 
-// ─── Auth: Password Reset ───────────────────────────────
+
 export async function requestPasswordReset(phone: string) {
   const res = await apiFetch('/auth/reset-password', {
     method: 'POST',
@@ -69,7 +69,7 @@ export async function verifyPasswordReset(phone: string, otp: string, newPasswor
   return res.json();
 }
 
-// ─── Legacy OTP (backward compat) ───────────────────────
+
 export async function sendOtp(phone: string) {
   const res = await apiFetch('/auth/otp/send', { method: 'POST', body: JSON.stringify({ phone }) });
   return res.json();
@@ -80,7 +80,7 @@ export async function verifyOtp(phone: string, otp: string) {
   return res.json();
 }
 
-// ─── Vehicles ───────────────────────────────────────────
+
 export interface VehicleFilters {
   type?: string; evOnly?: boolean; minPrice?: number; maxPrice?: number; location?: string; sort?: string;
 }
@@ -110,7 +110,7 @@ export async function searchVehicles(filters: Record<string, any>) {
   return res.json();
 }
 
-// ─── Bookings ───────────────────────────────────────────
+
 export async function createBooking(data: {
   vehicleId: string; startDate: string; endDate: string; paymentMethod: string; totalAmount: number;
 }) {
@@ -131,7 +131,7 @@ export async function getBookings() {
   return res.json();
 }
 
-// ─── Payments ───────────────────────────────────────────
+
 export async function verifyEsewaPayment(data: { bookingId: string; referenceId: string; productId: string; amount: number }) {
   const res = await apiFetch('/payments/esewa/verify', {
     method: 'POST',
@@ -148,7 +148,7 @@ export async function verifyKhaltiPayment(data: { bookingId: string; token: stri
   return res.json();
 }
 
-// ─── Admin ──────────────────────────────────────────────
+
 export async function getAdminStats() { return (await apiFetch('/admin/stats')).json(); }
 export async function getAdminUsers() { return (await apiFetch('/admin/users')).json(); }
 export async function getAdminBookings() { return (await apiFetch('/admin/bookings')).json(); }
@@ -166,5 +166,43 @@ export async function deleteVehicle(vehicleId: string) {
 
 export async function createVehicle(data: Record<string, any>) {
   const res = await apiFetch('/vehicles', { method: 'POST', body: JSON.stringify(data) });
+  return res.json();
+}
+
+export async function getVehicleReviews(vehicleId: string) {
+  const res = await apiFetch(`/vehicles/${vehicleId}/reviews`);
+  return res.json();
+}
+
+export async function createReview(data: { vehicleId: string; rating: number; comment?: string; bookingId?: string }) {
+  const res = await apiFetch('/reviews', {
+    method: 'POST',
+    body: JSON.stringify({
+      vehicle_id: data.vehicleId,
+      rating: data.rating,
+      comment: data.comment ?? '',
+      booking_id: data.bookingId,
+    }),
+  });
+  return res.json();
+}
+
+export async function getDrivers() {
+  const res = await apiFetch('/drivers');
+  return res.json();
+}
+
+export async function getDriver(id: string) {
+  const res = await apiFetch(`/drivers/${id}`);
+  return res.json();
+}
+
+export async function getBundles() {
+  const res = await apiFetch('/bundles');
+  return res.json();
+}
+
+export async function getBundle(id: string) {
+  const res = await apiFetch(`/bundles/${id}`);
   return res.json();
 }

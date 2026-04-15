@@ -17,6 +17,8 @@ COPY --from=builder /app/package*.json ./
 RUN npm ci --omit=dev
 
 ENV PUBLIC_API_URL=http://backend:3001/api
+ENV HOST=0.0.0.0
+ENV PORT=5173
 
 EXPOSE 5173
 
